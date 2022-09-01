@@ -1,0 +1,1556 @@
+#################################################################
+#                                                               #
+#                    Packages/Irrigation Garden                 #
+#                    Author: Alessandro Bardi                   #
+#                    Ver. 1.2                                   #
+#                    Release date: 2021-03-14                   #
+#################################################################
+#################################################################
+#                                                               #
+#                          Customize                            #
+#                                                               #
+#################################################################
+homeassistant:
+  customize:
+    sensor.giardino_fronte_linea1_time_left:
+      icon: mdi:progress-clock
+    sensor.giardino_fronte_linea2_time_left:
+      icon: mdi:progress-clock
+    sensor.giardino_retro_linea1_time_left:
+      icon: mdi:progress-clock
+    sensor.giardino_retro_linea2_time_left:
+      icon: mdi:progress-clock
+    sensor.giardino_retro_linea3_time_left:
+      icon: mdi:progress-clock
+    sensor.giardino_retro_linea4_time_left:
+      icon: mdi:progress-clock
+    sensor.irrigazione_goccia_fronte_time_left:
+      icon: mdi:progress-clock
+    sensor.irrigazione_goccia_retro_time_left:
+      icon: mdi:progress-clock
+    script.update_mappa_zigbee:
+      icon: mdi:graphql
+    script.stop_irrigazione:
+      icon: mdi:diameter-variant
+
+  customize_glob:
+    "switch.irrigazione_*":
+      entity_picture: /local/icons/sprinkler-pause.gif
+#################################################################
+#                                                               #
+#                            SENSOR                             #
+#                                                               #
+#################################################################
+sensor:
+#################################################################
+  - platform: history_stats
+    name: Irrigato linea 1 fronte per
+    entity_id: switch.valvola_fronte_linea_1
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: history_stats
+    name: Irrigato linea 2 fronte per
+    entity_id: switch.valvola_fronte_linea_2
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: history_stats
+    name: Irrigato linea 1 retro per
+    entity_id: switch.valvola_retro_linea_1
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: history_stats
+    name: Irrigato linea 2 retro per
+    entity_id: switch.valvola_retro_linea_2
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: history_stats
+    name: Irrigato linea 3 retro per
+    entity_id: switch.valvola_retro_linea_3
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: history_stats
+    name: Irrigato linea 4 retro per
+    entity_id: switch.valvola_retro_linea_4
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: history_stats
+    name: Irrigato Goccia Fronte per
+    entity_id: switch.valvola_goccia_fronte
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: history_stats
+    name: Irrigato Goccia Retro per
+    entity_id: switch.valvola_goccia_retro
+    state: 'on'
+    type: time
+    start: '{{ as_timestamp(now().replace(hour=0).replace(minute=0).replace(second=0)) }}'
+    end: '{{ as_timestamp(now()) }}'
+
+  - platform: template
+    sensors:
+      irrigazione_fronte_status:
+        value_template: "{{ states('input_select.irrigazione_fronte_status') }}"
+        friendly_name: 'Status irrigazione Fronte'
+
+  - platform: template
+    sensors:
+      irrigazione_retro_status:
+        value_template: "{{ states('input_select.irrigazione_retro_status') }}"
+        friendly_name: 'Status irrigazione Retro'
+
+  - platform: template
+    sensors:
+      irrigazione_goccia_status:
+        value_template: "{{ states('input_select.irrigazione_goccia_status') }}"
+        friendly_name: 'Status irrigazione Goccia'
+
+  - platform: template
+    sensors:
+      irrigation_time_fronte:
+        value_template: >-
+          {% if states('switch.valvola_fronte_linea_1') == 'on' %}
+            00:0{{ states('input_number.slider_zona_5') | int }}:00
+          {% elif states('switch.valvola_fronte_linea_2') == 'on' %}
+            00:0{{ states('input_number.slider_zona_6') | int }}:00
+          {% else %}
+            Inattivo
+          {% endif %}
+
+  - platform: template
+    sensors:
+      irrigation_time_retro:
+        value_template: >-
+          {% if states('switch.valvola_retro_linea_1') == 'on' %}
+            00:0{{ states('input_number.slider_zona_1') | int }}:00
+          {% elif states('switch.valvola_retro_linea_2') == 'on' %}
+            00:0{{ states('input_number.slider_zona_2') | int }}:00
+          {% elif states('switch.valvola_retro_linea_3') == 'on' %}
+            00:0{{ states('input_number.slider_zona_3') | int }}:00
+          {% elif states('switch.valvola_retro_linea_4') == 'on' %}
+            00:0{{ states('input_number.slider_zona_4') | int }}:00
+          {% else %}
+            Inattivo
+          {% endif %}
+
+  - platform: template
+    sensors:
+      irrigation_time_goccia:
+        value_template: >-
+          {% if states('switch.valvola_goccia_fronte') == 'on' %}
+            00:{{ states('input_number.slider_zona_7') | int }}:00
+          {% elif states('switch.valvola_goccia_retro') == 'on' %}
+            00:{{ states('input_number.slider_zona_8') | int }}:00
+          {% else %}
+            Inattivo
+          {% endif %}
+#################################################################
+#                                                               #
+#          INPUT BOOLEAN - DAYS OF WEEK                         #
+#                                                               #
+#################################################################
+input_boolean:
+#################################################################
+  # irrigazione Giorni della settimana Giardino Fronte
+  monday_giardino_fronte:
+    name: Lun
+    icon: mdi:alpha-l-box
+  tuesday_giardino_fronte:
+    name: Mar
+    icon: mdi:alpha-m-box
+  wednesday_giardino_fronte:
+    name: Mer
+    icon: mdi:alpha-m-box
+  thursday_giardino_fronte:
+    name: Gio
+    icon: mdi:alpha-g-box
+  friday_giardino_fronte:
+    name: Ven
+    icon: mdi:alpha-v-box
+  saturday_giardino_fronte:
+    name: Sab
+    icon: mdi:alpha-s-box
+  sunday_giardino_fronte:
+    name: Dom
+    icon: mdi:alpha-d-box
+  # irrigazione Giorni della settimana Giardino Retro
+  monday_giardino_retro:
+    name: Lun
+    icon: mdi:alpha-l-box
+  tuesday_giardino_retro:
+    name: Mar
+    icon: mdi:alpha-m-box
+  wednesday_giardino_retro:
+    name: Mer
+    icon: mdi:alpha-m-box
+  thursday_giardino_retro:
+    name: Gio
+    icon: mdi:alpha-g-box
+  friday_giardino_retro:
+    name: Ven
+    icon: mdi:alpha-v-box
+  saturday_giardino_retro:
+    name: Sab
+    icon: mdi:alpha-s-box
+  sunday_giardino_retro:
+    name: Dom
+    icon: mdi:alpha-d-box
+  # irrigazione Giorni della settimana Goccia
+  monday_goccia:
+    name: Lun
+    icon: mdi:alpha-l-box
+  tuesday_goccia:
+    name: Mar
+    icon: mdi:alpha-m-box
+  wednesday_goccia:
+    name: Mer
+    icon: mdi:alpha-m-box
+  thursday_goccia:
+    name: Gio
+    icon: mdi:alpha-g-box
+  friday_goccia:
+    name: Ven
+    icon: mdi:alpha-v-box
+  saturday_goccia:
+    name: Sab
+    icon: mdi:alpha-s-box
+  sunday_goccia:
+    name: Dom
+    icon: mdi:alpha-d-box
+  impostazioni_irrigazione_giardino_fronte:
+    name: Impostazioni
+    icon: mdi:settings
+    initial: off
+  impostazioni_irrigazione_giardino_retro:
+    name: Impostazioni
+    icon: mdi:settings
+    initial: off
+  impostazioni_irrigazione_goccia:
+    name: Impostazioni
+    icon: mdi:settings
+    initial: off
+#################################################################
+#                                                               #
+#          INPUT DATETIME - SELECT IRRIGATION DAYS              #
+#                                                               #
+#################################################################
+input_datetime:
+#################################################################
+  # Orario partenza irrigazione Giardino Fronte
+    time_start_irrigazione_giardino_fronte:
+      name: Orario Irrigazione Giardino Fronte
+      has_date: false
+      has_time: true
+
+  # Orario partenza irrigazione Giardino Retro
+    time_start_irrigazione_giardino_retro:
+      name: Orario Irrigazione Giardino Retro
+      has_date: false
+      has_time: true
+
+  # Orario partenza irrigazione Goccia
+    time_start_irrigazione_goccia:
+      name: Orario Irrigazione Goccia
+      has_date: false
+      has_time: true
+
+    irrigazione_giardino_fronte_time_end:
+      name: End time
+      has_date: true
+      has_time: true
+
+    irrigazione_giardino_retro_time_end:
+      name: End time
+      has_date: true
+      has_time: true
+
+    irrigazione_goccia_time_end:
+      name: End time
+      has_date: true
+      has_time: true
+#################################################################
+#                                                               #
+#                 INPUT BOOLEAN SELECT STEP                     #
+#                                                               #
+#################################################################
+input_select:
+#################################################################
+  irrigazione_fronte_status:
+    name: Stato Irrigazione Fronte
+    options:
+      - Avviare
+      - Linea 1
+      - Linea 2
+      - Terminata
+      - Controllo Stop Valvole
+    initial: Avviare
+
+  irrigazione_retro_status:
+    name: Stato Irrigazione Retro
+    options:
+      - Avviare
+      - Linea 1
+      - Linea 2
+      - Linea 3
+      - Laterale
+      - Terminata
+      - Controllo Stop Valvole
+    initial: Avviare
+
+  irrigazione_goccia_status:
+    name: Stato Goccia
+    options:
+      - Avviare
+      - Fronte
+      - Retro
+      - Terminata
+      - Controllo Stop Valvole
+    initial: Avviare
+#################################################################
+#                                                               #
+#    INPUT NUMBER SLIDER DURATA IRRIGAZIONE                     #
+#                                                               #
+#################################################################
+input_number:
+#################################################################
+  # Tempo zona 1
+    slider_zona_1:
+      name: "Retro 1"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+
+  # Tempo zona 2
+    slider_zona_2:
+      name: "Retro 2"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+
+  # Tempo zona 3
+    slider_zona_3:
+      name: "Retro 3"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+
+  # Tempo zona 4
+    slider_zona_4:
+      name: "Retro 4"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+
+  # Tempo zona 5
+    slider_zona_5:
+      name: "Fronte 1"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+
+  # Tempo zona 6
+    slider_zona_6:
+      name: "Fronte 2"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+
+  # Tempo zona 7
+    slider_zona_7:
+      name: "Goccia Fronte"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+
+  # Tempo zona 8
+    slider_zona_8:
+      name: "Goccia Retro"
+      icon: mdi:clock-end
+      min: 1
+      max: 30
+      step: 1
+#################################################################
+#                                                               #
+#    TIMER                                                      #
+#                                                               #
+#################################################################
+timer:
+#################################################################
+  irrigazione_goccia_fronte_duration:
+    name: Tempo residuo Fronte
+    icon: mdi:clock
+
+  irrigazione_goccia_retro_duration:
+    name: Tempo residuo Retro
+    icon: mdi:clock
+
+  giardino_fronte_linea1_duration:
+    name: Tempo residuo Linea 1
+    icon: mdi:clock
+
+  giardino_fronte_linea2_duration:
+    name: Tempo residuo Linea 2
+    icon: mdi:clock
+
+  giardino_retro_linea1_duration:
+    name: Tempo residuo Linea 1
+    icon: mdi:clock
+
+  giardino_retro_linea2_duration:
+    name: Tempo residuo Linea 2
+    icon: mdi:clock
+
+  giardino_retro_linea3_duration:
+    name: Tempo residuo Linea 3
+    icon: mdi:clock
+
+  giardino_retro_linea4_duration:
+    name: Tempo residuo Linea 4
+    icon: mdi:clock
+
+  irrigation_timer:
+    name: Tempo residuo
+    icon: mdi:clock
+
+#################################################################
+#                                                               #
+#    SCRIPTS                                                    #
+#                                                               #
+#################################################################
+script:
+############################################
+# Script Irrigazione Giardino Fronte       #
+############################################
+  timed_giardino_fronte:
+    alias: "Set Garden Timer"
+    sequence:
+        # Cancel ev. old timers
+      - service: script.turn_off
+        data:
+          entity_id: script.timer_off_giardino_fronte
+        # Set new timer
+      - service: script.turn_on
+        data:
+          entity_id: script.timer_off_giardino_fronte
+  timer_off_giardino_fronte:
+    alias: "Turn Off Irrigazione"
+    sequence:
+      - delay: '00:0{{ states.input_number.slider_zona_5.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_fronte_linea_1
+      - service: switch.turn_on
+        entity_id: switch.valvola_fronte_linea_2
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_fronte_status
+          option: Linea 2
+      - service: timer.start
+        data_template:
+          entity_id: timer.giardino_fronte_linea2_duration
+          duration: '00:0{{ states.input_number.slider_zona_6.state | int }}:00'
+      - delay: '00:0{{ states.input_number.slider_zona_6.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_fronte_linea_2
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_fronte_status
+          option: Terminata
+      - service: notify.telegram_alessandro
+        data:
+          title: "Domotica - Irrigazione"
+          message: 'Irrigazione giardino Fronte terminata'
+      - delay:
+          minutes: 1
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_fronte_status
+          option: Controllo Stop Valvole
+      - service: script.turn_on
+        data:
+          entity_id: script.stop_irrigazione
+
+  ############################################
+  # Script Irrigazione Giardino Retro       #
+  ############################################
+  timed_giardino_retro:
+    alias: "Set Garden Timer"
+    sequence:
+        # Cancel ev. old timers
+      - service: script.turn_off
+        data:
+          entity_id: script.timer_off_giardino_retro
+        # Set new timer
+      - service: script.turn_on
+        data:
+          entity_id: script.timer_off_giardino_retro
+
+  timer_off_giardino_retro:
+    alias: "Turn Off Irrigazione"
+    sequence:
+      - delay: '00:0{{ states.input_number.slider_zona_1.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_1
+      - service: switch.turn_on
+        entity_id: switch.valvola_retro_linea_2
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_retro_status
+          option: Linea 2
+      - service: timer.start
+        data_template:
+          entity_id: timer.giardino_retro_linea2_duration
+          duration: '00:0{{ states.input_number.slider_zona_2.state | int }}:00'
+      - delay: '00:0{{ states.input_number.slider_zona_2.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_2
+      - service: switch.turn_on
+        entity_id: switch.valvola_retro_linea_3
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_retro_status
+          option: Linea 3
+      - service: timer.start
+        data_template:
+          entity_id: timer.giardino_retro_linea3_duration
+          duration: '00:0{{ states.input_number.slider_zona_3.state | int }}:00'
+      - delay: '00:0{{ states.input_number.slider_zona_3.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_3
+      - service: switch.turn_on
+        entity_id: switch.valvola_retro_linea_4
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_retro_status
+          option: Laterale
+      - service: timer.start
+        data_template:
+          entity_id: timer.giardino_retro_linea4_duration
+          duration: '00:0{{ states.input_number.slider_zona_4.state | int }}:00'
+      - delay: '00:0{{ states.input_number.slider_zona_4.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_4
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_retro_status
+          option: Terminata
+      - service: notify.telegram_alessandro
+        data:
+          title: "Domotica - Irrigazione"
+          message: 'Irrigazione giardino Retro terminata'
+      - delay:
+          minutes: 1
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_retro_status
+          option: Controllo Stop Valvole
+      - service: script.turn_on
+        data:
+          entity_id: script.stop_irrigazione
+
+  ##########################################
+  # Script Irrigazione Goccia Fronte/Retro #
+  ##########################################
+  timed_goccia_fronte:
+    alias: "Set Garden Timer"
+    sequence:
+        # Cancel ev. old timers
+      - service: script.turn_off
+        data:
+          entity_id: script.timer_off_goccia
+        # Set new timer
+      - service: script.turn_on
+        data:
+          entity_id: script.timer_off_goccia
+  timer_off_goccia:
+    alias: "Turn On/Off Irrigazione"
+    sequence:
+      - delay: '00:0{{ states.input_number.slider_zona_7.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_goccia_fronte
+      - service: switch.turn_on
+        entity_id: switch.valvola_goccia_retro
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_goccia_status
+          option: Retro
+      - service: timer.start
+        data_template:
+          entity_id: timer.irrigazione_goccia_retro_duration
+          duration: '00:0{{ states.input_number.slider_zona_8.state | int }}:00'
+      - delay: '00:0{{ states.input_number.slider_zona_8.state | int }}:00'
+      - service: switch.turn_off
+        entity_id: switch.valvola_goccia_retro
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_goccia_status
+          option: Terminata
+      - service: notify.telegram_alessandro
+        data:
+          title: "Domotica - Irrigazione"
+          message: 'Irrigazione Goccia terminata'
+      - delay: '00:01:00'
+      - service: input_select.select_option
+        data:
+          entity_id: input_select.irrigazione_goccia_status
+          option: Controllo Stop Valvole
+      - service: script.turn_on
+        data:
+          entity_id: script.stop_irrigazione
+
+  stop_irrigazione:
+    alias: "Ferma Irrigazione"
+    sequence:
+      - service: script.turn_off
+        data:
+          entity_id: script.timer_off_giardino_fronte
+      - delay:
+          seconds: 15
+      - service: script.turn_off
+        data:
+          entity_id: script.timer_off_giardino_retro
+      - delay:
+          seconds: 30
+      - service: script.turn_off
+        data:
+          entity_id: script.timer_off_goccia
+      - delay: '00:00:30'
+      - service: switch.turn_off
+        entity_id: switch.valvola_fronte_linea_1
+      - service: switch.turn_off
+        entity_id: switch.valvola_fronte_linea_2
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_1
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_2
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_3
+      - service: switch.turn_off
+        entity_id: switch.valvola_retro_linea_4
+      - service: switch.turn_off
+        entity_id: switch.valvola_goccia_fronte
+      - service: switch.turn_off
+        entity_id: switch.valvola_goccia_retro
+
+  irrigation_counter_fronte:
+    sequence:
+      - service: timer.start
+        data_template:
+          entity_id: timer.irrigation_timer
+          duration: '{{ states.sensor.irrigation_time_fronte.state | int }}'
+  irrigation_counter_retro:
+    sequence:
+      - service: timer.start
+        data_template:
+          entity_id: timer.irrigation_timer
+          duration: '{{ states.sensor.irrigation_time_retro.state | int }}'
+  irrigation_counter_goccia:
+    sequence:
+      - service: timer.start
+        data_template:
+          entity_id: timer.irrigation_timer
+          duration: '{{ states.sensor.irrigation_time_goccia.state | int }}'
+#################################################################
+#                                                               #
+#                          AUTOMATIONS                          #
+#                                                               #
+#################################################################
+automation:
+#################################################################
+  - id: irrigazione_lun_fronte
+    alias: Irrigazione Fronte Lunedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_fronte.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.monday_giardino_fronte
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'lun'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_fronte_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_fronte_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_5.state | int }}:00
+  - id: irrigazione_mar_fronte
+    alias: Irrigazione Fonte Martedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_fronte.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.tuesday_giardino_fronte
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'mar'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_fronte_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_fronte_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_5.state | int }}:00
+  - id: irrigazione_mer_fronte
+    alias: Irrigazione Fronte Mercoledi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_fronte.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.wednesday_giardino_fronte
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'mer'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_fronte_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_fronte_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_5.state | int }}:00
+  - id: irrigazione_gio_fronte
+    alias: Irrigazione Fronte Giovedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_fronte.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.thursday_giardino_fronte
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'gio'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_fronte_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_fronte_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_5.state | int }}:00
+  - id: irrigazione_ven_fronte
+    alias: Irrigazione Fronte Venerdi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_fronte.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.friday_giardino_fronte
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'ven'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_fronte_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_fronte_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_5.state | int }}:00
+  - id: irrigazione_sab_fronte
+    alias: Irrigazione Fronte Sabato
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_fronte.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.saturday_giardino_fronte
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'sab'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_fronte_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_fronte_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_5.state | int }}:00
+  - id: irrigazione_dom_fronte
+    alias: Irrigazione Fronte Domenica
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_fronte.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.sunday_giardino_fronte
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'dom'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_fronte_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_fronte_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_5.state | int }}:00
+  - id: irrigazione_lun_retro
+    alias: Irrigazione Retro Lunedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_retro.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.monday_giardino_retro
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'lun'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_retro_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_retro_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_1.state | int }}:00
+  - id: irrigazione_mar_retro
+    alias: Irrigazione Retro Martedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_retro.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.tuesday_giardino_retro
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'mar'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_retro_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_retro_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_1.state | int }}:00
+  - id: irrigazione_mer_retro
+    alias: Irrigazione Retro Mercoledi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_retro.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.wednesday_giardino_retro
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'mer'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_retro_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_retro_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_1.state | int }}:00
+  - id: irrigazione_gio_retro
+    alias: Irrigazione Retro Giovedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_retro.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.thursday_giardino_retro
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'gio'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_retro_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_retro_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_1.state | int }}:00
+  - id: irrigazione_ven_retro
+    alias: Irrigazione Retro Venerdi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_retro.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.friday_giardino_retro
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'ven'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_retro_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_retro_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_1.state | int }}:00
+  - id: irrigazione_sab_retro
+    alias: Irrigazione Retro Sabato
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_retro.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.saturday_giardino_retro
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'sab'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_retro_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_retro_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_1.state | int }}:00
+  - id: irrigazione_dom_retro
+    alias: Irrigazione Retro Domenica
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_giardino_retro.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.sunday_giardino_retro
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'dom'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_retro_linea_1
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Linea 1
+    - service: timer.start
+      data_template:
+        entity_id: timer.giardino_retro_linea1_duration
+        duration: 00:0{{ states.input_number.slider_zona_1.state | int }}:00
+  - id: irrigazione_goccia_lun
+    alias: Irrigazione Goccia Lunedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_goccia.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.monday_goccia
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'lun'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_goccia_fronte
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Fronte
+    - service: timer.start
+      data_template:
+        entity_id: timer.irrigazione_goccia_fronte_duration
+        duration: 00:0{{ states.input_number.slider_zona_7.state | int }}:00
+  - id: irrigazione_goccia_mar
+    alias: Irrigazione Goccia Martedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_goccia.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.tuesday_goccia
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'mar'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_goccia_fronte
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Fronte
+    - service: timer.start
+      data_template:
+        entity_id: timer.irrigazione_goccia_fronte_duration
+        duration: 00:0{{ states.input_number.slider_zona_7.state | int }}:00
+  - id: irrigazione_goccia_mer
+    alias: Irrigazione Goccia Mercoledi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_goccia.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.wednesday_goccia
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'mer'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_goccia_fronte
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Fronte
+    - service: timer.start
+      data_template:
+        entity_id: timer.irrigazione_goccia_fronte_duration
+        duration: 00:0{{ states.input_number.slider_zona_7.state | int }}:00
+  - id: irrigazione_goccia_gio
+    alias: Irrigazione Goccia Giovedi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_goccia.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.thursday_goccia
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'gio'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_goccia_fronte
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Fronte
+    - service: timer.start
+      data_template:
+        entity_id: timer.irrigazione_goccia_fronte_duration
+        duration: 00:0{{ states.input_number.slider_zona_7.state | int }}:00
+  - id: irrigazione_goccia_ven
+    alias: Irrigazione Goccia Venerdi
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_goccia.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.friday_goccia
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'ven'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_goccia_fronte
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Fronte
+    - service: timer.start
+      data_template:
+        entity_id: timer.irrigazione_goccia_fronte_duration
+        duration: 00:0{{ states.input_number.slider_zona_7.state | int }}:00
+  - id: irrigazione_goccia_sab
+    alias: Irrigazione Goccia Sabato
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_goccia.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.saturday_goccia
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'sab'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_goccia_fronte
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Fronte
+    - service: timer.start
+      data_template:
+        entity_id: timer.irrigazione_goccia_fronte_duration
+        duration: 00:0{{ states.input_number.slider_zona_7.state | int }}:00
+  - id: irrigazione_goccia_dom
+    alias: Irrigazione Goccia Domenica
+    trigger:
+    - platform: template
+      value_template: "{{ states('sensor.time') == (states.input_datetime.time_start_irrigazione_goccia.attributes.timestamp | int | timestamp_custom('%H:%M', False)) }}"
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: input_boolean.sunday_goccia
+        state: 'on'
+      - condition: state
+        entity_id: sensor.day_of_week
+        state: 'dom'
+      - condition: state
+        entity_id: input_boolean.irrigation_water
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.dark_sky_precip_probability_0d
+        below: 70
+      - condition: numeric_state
+        entity_id: sensor.pioggia_giornaliera_meteonetwork
+        below: 3.0
+    action:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.valvola_goccia_fronte
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Fronte
+    - service: timer.start
+      data_template:
+        entity_id: timer.irrigazione_goccia_fronte_duration
+        duration: 00:0{{ states.input_number.slider_zona_7.state | int }}:00
+  - id: timer_off_zona_giardino_fronte
+    alias: Timer off Irrigazione Giardino Fronte
+    trigger:
+    - entity_id: switch.valvola_fronte_linea_1
+      platform: state
+      to: 'on'
+    action:
+    - service: script.turn_on
+      entity_id: script.timed_giardino_fronte
+    - service: notify.telegram_alessandro
+      data:
+        title: Domotica - Irrigazione
+        message: Inizio irrigazione giardino Fronte
+  - alias: Giardino Fronte in avviare
+    initial_state: true
+    trigger:
+    - platform: state
+      entity_id: input_select.irrigazione_fronte_status
+      to: Controllo Stop Valvole
+      for:
+        minutes: 5
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: switch.valvola_fronte_linea_1
+        state: 'off'
+      - condition: state
+        entity_id: switch.valvola_fronte_linea_2
+        state: 'off'
+    action:
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_fronte_status
+        option: Avviare
+    id: 0a8f8ec4e56c44078dec13dbec0272eb
+  - id: timer_off_zona_giardino_retro
+    alias: Timer off Irrigazione Giardino Retro
+    trigger:
+    - entity_id: switch.valvola_retro_linea_1
+      platform: state
+      to: 'on'
+    action:
+    - service: script.turn_on
+      entity_id: script.timed_giardino_retro
+    - service: notify.telegram_alessandro
+      data:
+        title: Domotica - Irrigazione
+        message: Inizio irrigazione giardino Retro
+  - alias: Giardino Retro in avviare
+    initial_state: true
+    trigger:
+    - platform: state
+      entity_id: input_select.irrigazione_retro_status
+      to: Controllo Stop Valvole
+      for:
+        minutes: 5
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: switch.valvola_retro_linea_1
+        state: 'off'
+      - condition: state
+        entity_id: switch.valvola_retro_linea_2
+        state: 'off'
+      - condition: state
+        entity_id: switch.valvola_retro_linea_3
+        state: 'off'
+      - condition: state
+        entity_id: switch.valvola_retro_linea_4
+        state: 'off'
+    action:
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_retro_status
+        option: Avviare
+    id: c7f69d06f78f4aba96fb738106eb03f4
+  - id: timer_off_zona_goccia
+    alias: Timer off Irrigazione Goccia
+    trigger:
+    - entity_id: switch.valvola_goccia_fronte
+      platform: state
+      to: 'on'
+    action:
+    - service: script.turn_on
+      entity_id: script.timed_goccia_fronte
+    - service: notify.telegram_alessandro
+      data:
+        title: Domotica - Irrigazione
+        message: Inizio irrigazione Goccia
+  - alias: Irrigazione goccia in avviare
+    initial_state: true
+    trigger:
+    - platform: state
+      entity_id: input_select.irrigazione_goccia_status
+      to: Controllo Stop Valvole
+      for:
+        minutes: 5
+    condition:
+      condition: and
+      conditions:
+      - condition: state
+        entity_id: switch.valvola_goccia_fronte
+        state: 'off'
+      - condition: state
+        entity_id: switch.valvola_goccia_retro
+        state: 'off'
+    action:
+    - service: input_select.select_option
+      data:
+        entity_id: input_select.irrigazione_goccia_status
+        option: Avviare
+    id: 699821ba256c42c7a7fbc802cae6ffd7
+  - id: Indice Pioggia
+    alias: Automazione rilevamento Pioggia
+    trigger:
+    - platform: numeric_state
+      entity_id: sensor.pioggia_giornaliera_meteonetwork
+      above: 1.0
+    action:
+      service: input_boolean.turn_on
+      entity_id: input_boolean.irrigation_water
+  - id: Riazzero booleano
+    alias: Riazzero booleano
+    trigger:
+      platform: time
+      at: 00:01:00
+    action:
+      service: input_boolean.turn_off
+      entity_id: input_boolean.irrigation_water
+#################################################################
+#                                                               #
+#                     END OF CONFIGURATION FILE                 #
+#                                                               #
+#################################################################

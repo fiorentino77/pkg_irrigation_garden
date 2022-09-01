@@ -1,0 +1,146 @@
+cards:
+  - aspect_ratio: 50%
+    elements:
+      - entity: sensor.irrigation_time_goccia
+        style:
+          bottom: 0
+          color: white
+          font-size: 16px
+          line-height: 62px
+          padding: 0px 15px
+          pointer-events: none
+          right: 0
+          top: 72%
+          transform: initial
+        type: state-label
+      - entity: input_select.irrigazione_goccia_status
+        prefix: 'Stato: '
+        style:
+          color: rgba(255,255,255,0.8)
+          font-size: 16px
+          font-weight: bold
+          left: '-4%'
+          line-height: 32px
+          padding: 8px 35px
+          pointer-events: none
+          top: 75%
+          transform: initial
+        type: state-label
+    image: /local/images/irrigazione_goccia.png
+    type: picture-elements
+  - cards:
+      - entity: switch.valvola_goccia_fronte
+        hold_action:
+          action: more-info
+        icon: mdi:engine
+        icon_height: 50px
+        name: Valvola Goccia Fronte
+        show_icon: true
+        show_name: true
+        style: |
+          ha-card {
+            border: solid 2px deepskyblue;
+          }
+        tap_action:
+          action: toggle
+        theme: darkmix
+        type: button
+      - entity: switch.valvola_goccia_retro
+        hold_action:
+          action: more-info
+        icon: mdi:engine
+        icon_height: 50px
+        name: Valvola Goccia Retro
+        show_icon: true
+        show_name: true
+        style: |
+          ha-card {
+            border: solid 2px deepskyblue;
+          }
+        tap_action:
+          action: toggle
+        theme: darkmix
+        type: button
+    type: horizontal-stack
+  - entities:
+      - entity: sensor.irrigato_goccia_fronte_per
+      - entity: sensor.irrigato_goccia_retro_per
+    style: |
+      ha-card {
+        border: solid 2px deepskyblue;
+      }
+    theme: darkmix
+    title: Tempo irrigazione odierno
+    type: entities
+  - entities:
+      - input_boolean.impostazioni_irrigazione_goccia
+    show_header_toggle: false
+    style: |
+      ha-card {
+        border: solid 2px deepskyblue;
+      }
+    theme: darkmix
+    title: Impostazioni
+    type: entities
+  - card:
+      entities:
+        - entity: input_datetime.time_start_irrigazione_goccia
+      show_header_toggle: false
+      style: |
+        ha-card {
+          border: solid 2px deepskyblue;
+        }
+      theme: darkmix
+      title: Irrigazione Goccia Fronte/Retro
+      type: entities
+    conditions:
+      - entity: input_boolean.impostazioni_irrigazione_goccia
+        state: 'on'
+    type: conditional
+  - card:
+      entities:
+        - entity: input_boolean.monday_goccia
+        - entity: input_boolean.tuesday_goccia
+        - entity: input_boolean.wednesday_goccia
+        - entity: input_boolean.thursday_goccia
+        - entity: input_boolean.friday_goccia
+        - entity: input_boolean.saturday_goccia
+        - entity: input_boolean.sunday_goccia
+      show_header_toggle: false
+      style: |
+        ha-card {
+          border: solid 2px deepskyblue;
+        }
+      theme: darkmix
+      title: Giorni
+      type: entities
+    conditions:
+      - entity: input_boolean.impostazioni_irrigazione_goccia
+        state: 'on'
+    type: conditional
+  - card:
+      entities:
+        - entity: input_number.slider_zona_7
+        - entity: input_number.slider_zona_8
+      show_header_toggle: false
+      style: |
+        ha-card {
+          border: solid 2px deepskyblue;
+        }
+      theme: darkmix
+      type: entities
+    conditions:
+      - entity: input_boolean.impostazioni_irrigazione_goccia
+        state: 'on'
+    type: conditional
+  - cards:
+      - entities:
+          - entity: script.stop_irrigazione
+        show_header_toggle: false
+        style: |
+          ha-card {
+            border: solid 2px deepskyblue;
+          }
+        type: entities
+    type: horizontal-stack
+type: vertical-stack

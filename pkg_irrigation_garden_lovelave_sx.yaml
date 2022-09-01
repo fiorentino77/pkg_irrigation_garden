@@ -1,0 +1,151 @@
+cards:
+  - aspect_ratio: 50%
+    elements:
+      - entity: sensor.irrigation_time_fronte
+        style:
+          bottom: 0
+          color: white
+          font-size: 16px
+          line-height: 62px
+          padding: 0px 15px
+          pointer-events: none
+          right: 0
+          top: 72%
+          transform: initial
+        type: state-label
+      - entity: input_select.irrigazione_fronte_status
+        prefix: 'Stato: '
+        style:
+          color: rgba(255,255,255,0.8)
+          font-size: 16px
+          font-weight: bold
+          left: '-4%'
+          line-height: 32px
+          padding: 8px 35px
+          pointer-events: none
+          top: 75%
+          transform: initial
+        type: state-label
+    image: /local/images/irrigazione_fronte.png
+    type: picture-elements
+    entities:
+      - {}
+  - cards:
+      - entity: switch.valvola_fronte_linea_1
+        hold_action:
+          action: more-info
+        icon: mdi:engine
+        icon_height: 50px
+        name: Linea 1
+        show_icon: true
+        show_name: true
+        style: |
+          ha-card {
+            border: solid 2px deepskyblue;
+          }
+        tap_action:
+          action: toggle
+        theme: darkmix
+        type: button
+      - entity: switch.valvola_fronte_linea_2
+        hold_action:
+          action: more-info
+        icon: mdi:engine
+        icon_height: 50px
+        name: Linea 2
+        show_icon: true
+        show_name: true
+        style: |
+          ha-card {
+            border: solid 2px deepskyblue;
+          }
+        tap_action:
+          action: toggle
+        theme: darkmix
+        type: button
+    type: horizontal-stack
+  - entities:
+      - entity: sensor.irrigato_linea_1_fronte_per
+      - entity: sensor.irrigato_linea_2_fronte_per
+    show_header_toggle: false
+    style: |
+      ha-card {
+        border: solid 2px deepskyblue;
+      }
+    theme: darkmix
+    title: Tempo irrigazione odierno
+    type: entities
+  - entities:
+      - entity: automation.pioggia_rilevata
+      - entity: input_boolean.irrigation_water
+      - entity: sensor.dark_sky_precip_probability_0d
+    show_header_toggle: false
+    style: |
+      ha-card {
+        border: solid 2px deepskyblue;
+      }
+    theme: darkmix
+    title: Rischio pioggia
+    type: entities
+  - entities:
+      - input_boolean.impostazioni_irrigazione_giardino_fronte
+    show_header_toggle: false
+    style: |
+      ha-card {
+        border: solid 2px deepskyblue;
+      }
+    theme: darkmix
+    title: Impostazioni
+    type: entities
+  - card:
+      entities:
+        - entity: input_datetime.time_start_irrigazione_giardino_fronte
+      show_header_toggle: false
+      style: |
+        ha-card {
+          border: solid 2px deepskyblue;
+        }
+      theme: darkmix
+      title: Irrigazione Giardino Fronte
+      type: entities
+    conditions:
+      - entity: input_boolean.impostazioni_irrigazione_giardino_fronte
+        state: 'on'
+    type: conditional
+  - card:
+      entities:
+        - entity: input_boolean.monday_giardino_fronte
+        - entity: input_boolean.tuesday_giardino_fronte
+        - entity: input_boolean.wednesday_giardino_fronte
+        - entity: input_boolean.thursday_giardino_fronte
+        - entity: input_boolean.friday_giardino_fronte
+        - entity: input_boolean.saturday_giardino_fronte
+        - entity: input_boolean.sunday_giardino_fronte
+      show_header_toggle: false
+      style: |
+        ha-card {
+          border: solid 2px deepskyblue;
+        }
+      theme: darkmix
+      title: Giorni
+      type: entities
+    conditions:
+      - entity: input_boolean.impostazioni_irrigazione_giardino_fronte
+        state: 'on'
+    type: conditional
+  - card:
+      entities:
+        - entity: input_number.slider_zona_5
+        - entity: input_number.slider_zona_6
+      show_header_toggle: false
+      style: |
+        ha-card {
+          border: solid 2px deepskyblue;
+        }
+      theme: darkmix
+      type: entities
+    conditions:
+      - entity: input_boolean.impostazioni_irrigazione_giardino_fronte
+        state: 'on'
+    type: conditional
+type: vertical-stack
